@@ -90,3 +90,7 @@ feed:
   path: atom.xml
   limit: 20
 
+search:
+  path: search.xml
+  field: post
+
