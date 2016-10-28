@@ -68,7 +68,18 @@ ubuntu              latest              17b6a9e179d7        5 days ago          
 容器
 
 ```
-docker create -ti -h teach —name teach -v /home/docker/data:/root/data -w /root ubuntu /bin/bash
+docker create -ti -h teach --name teach -v /home/docker/data:/root/data -w /root ubuntu /bin/bash
+```
+
+查看所有容器
+```
+docker ps -a -q
+```
+
+删除容器
+
+```
+docker rm container_id
 ```
 
 ```
@@ -78,7 +89,7 @@ docker attach
 安装必备工具
 
 ```
-sudo apt install gcc gdb binutils make git dstat sysstat htop curl wget readelf objdump pidstat
+sudo apt-get install gcc gdb binutils make git dstat sysstat htop curl wget readelf objdump pidstat
 ```
 
 

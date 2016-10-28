@@ -2,9 +2,10 @@ title: python开发环境
 date: 2016-05-25 14:05:18
 categories: python
 tags: 
----
   - python
   - develop
+
+---
 
 操作系统：mac OSX 10.11 或 Ubuntu 16.04  
 编辑器： vim、 sublime、PyCharm
@@ -111,6 +112,8 @@ make install
 
 设置全局配置文件
 
+vim .direnvrc
+
 ```
 use_venv () {
       export VIRTUAL_ENV = "${HOME} /.virtualenvs/${1}"
@@ -136,6 +139,7 @@ use vwrapper
 workon env2
 ```
 
+https://github.com/direnv/direnv/wiki/Python
 
 
 
