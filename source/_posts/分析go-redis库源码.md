@@ -445,5 +445,43 @@ func (c *Client) pubSub() *PubSub {
 
 ![](media/14778093207234.jpg)
 
+然后我们再看下，项目文件，还有什么我们并没有涉及到的
+
+
+```
+ $ ls                                                                                                                     
+CHANGELOG.md   cluster_client_test.go  doc.go            main_test.go      pubsub.go       ring.go           tx.go
+LICENSE        cluster_test.go         example_test.go   options.go        pubsub_test.go  ring_test.go      tx_test.go
+Makefile       command.go              export_test.go    parser.go         race_test.go    script.go
+README.md      command_test.go         internal/         pipeline.go       redis.go        sentinel.go
+bench_test.go  commands.go             iterator.go       pipeline_test.go  redis_test.go   sentinel_test.go
+cluster.go     commands_test.go        iterator_test.go  pool_test.go      result.go       testdata/
+```
+
+答案就是 cluster，cluster 是连接 redis 集群的方式，会提供给用户使用
+
+![](/media/14779019374152.jpg)
+
+
+我们详细看一下 cluster 源码，cluster 里面有自己的 Options，值得注意的是，有 Node 逻辑
+
+
+```
+type clusterNode struct {
+	Client  *Client
+	Latency time.Duration
+	loading time.Time
+}
+
+```
+使用组合的方式把 Client 包装进来。
+
+
+```
+
+```
+
+![](/media/14779085735522.jpg)
+
 
 
