@@ -17,11 +17,11 @@ $ alpine docker pull alpine
 ```
 $ docker images
 ```
-创建容 
+创建容器
 
 ```
 $ docker create -ti --name python -h python -p 8080:8080 -w /root alpine sh
-```启动容 
+```启动容器
 
 ```
 $ docker start python
@@ -79,6 +79,7 @@ $ pip -V
 pip 9.0.1 from /usr/lib/python3.5/site-packages (python 3.5)
 ```
 显示了全局的系统库路径
+
 
 # Python 项目管理思路
 
