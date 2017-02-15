@@ -1,7 +1,8 @@
-layout: title
 title: python开发环境
 date: 2016-12-13 11:42:21
+categories: python
 tags:
+  - python
 ---
 
 # docker 配置部分
@@ -17,26 +18,31 @@ $ alpine docker pull alpine
 ```
 $ docker images
 ```
-创建容器
+
+创建容器
 
 ```
 $ docker create -ti --name python -h python -p 8080:8080 -w /root alpine sh
-```启动容器
+```
+
+启动容器
 
 ```
 $ docker start python
 ```
 
-进入容器 
+进入容器 
 
 ```
 $ docker attach python
 ```
-停止容器
+
+停止容器
+
 ```
 $ docker stop python
 ```
-删除容器
+删除容器
 
 ```
 $ docker rm python
