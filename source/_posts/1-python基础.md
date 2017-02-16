@@ -194,7 +194,7 @@ Python将带小数点的数字都称为浮点数。大多数编程语言都使�
 'python培训哪家强：京峰教育, 京峰教育谁最帅？ 斌哥'
 ```
 
-### +
+#### +
 
 ```
 >>> '京峰' +  '教育'
@@ -325,7 +325,99 @@ tuple() 函数可以用其他类型的数据来创建元组：
 * 函数的参数是以元组形式是传递的
 
 ## 1.7 字典
+
 ## 1.8 集合
+
+集合就像舍弃了值，仅剩下的字典一样。键与键之间也不允许重复。如果你仅仅想知道某一个元素是否存在而不关心其他的，使用集合是个非常好的选择。如果需要为键附加其他信息的话建议使用字典。
+
+### 使用 set() 创建集合
+
+可以使用set()函数创建一个集合，或者用大括号将一系列一都好分开的值包裹起来：
+
+```
+>>> empty_set = set()
+>>> empty_set
+set()
+>>> num_set ={1,2,3,4,5}
+>>> num_set
+{1, 2, 3, 4, 5}
+```
+
+与字典一样，集合是无序的。
+
+> {} 创建的是一个空字典，这仅仅是因为字典出现的比较早抢占了花括号。
+
+
+### 使用set()将其他类型转换为集合
+
+你可以利用已有的列表、字符串、元组或字典的内容来创建集合，其中重复的值会被丢弃。
+
+首先来试着转换一个包含重复字母的字符串：
+
+```
+>>> set('letters')
+{'l', 'r', 'e', 't', 's'}
+```
+
+注意，上面得到的集合中仅含有一个 'e' 和一个 't'，尽管字符串 'letters' 里各自包含两个。
+
+再试试用列表建立集合：
+
+```
+>>> set(['one', 'two', 'three'])
+{'one', 'two', 'three'}
+```
+
+再看下元组：
+
+```
+>>> set(('one', 'two', 'three'))
+{'one', 'two', 'three'}
+```
+
+当字典作为参数传入set()函数时，只有键会被使用：
+
+```
+>>> set( {'apple': 'red', 'orange': 'orange', 'cherry': 'red'} )
+{'cherry', 'orange', 'apple'}
+```
+
+### 使用in测试值是否存在
+
+```
+>>> num_set = {'one', 'two', 'three'}
+>>> num_set
+{'one', 'two', 'three'}
+>>> 'one' in num_set
+True
+>>> 'four' in num_set
+False
+```
+
+### 添加删除数据
+
+```
+>>> num_set = {'one', 'two', 'three'}
+>>> num_set.add('four')
+>>> num_set
+{'one', 'two', 'four', 'three'}
+>>> num_set.remove('one')
+>>> num_set
+{'two', 'four', 'three'}
+```
+
+### 交集和并集
+
+set可以看成数学意义上的无序和无重复元素的集合，因此，两个set可以做数学意义上的交集、并集等操作：
+
+```
+>>> s1 = set([1, 2, 3])
+>>> s2 = set([2, 3, 4])
+>>> s1 & s2
+set([2, 3])
+>>> s1 | s2
+set([1, 2, 3, 4])
+```
   
 # 2. 代码格式
 
@@ -381,7 +473,6 @@ def print_lol(the_list):
 
 三元运算符可以只需要一行完成条件判断和赋值操作
 
-
 ```
 data = x if x < y else y
 ```
@@ -418,6 +509,29 @@ while True:
 ```
 
 例如上边的代码就是故意被设置为无限循环的，因为 True 无论如何都不会变成 False. 这是因为服务器代码是用来等待客户端(可能通过网络)来连接的. 这些客户端向服务器发送请求, 服务器处理请求. 请求被处理后, 服务器将向客户端返回数据, 而此时客户端可能断开连接或是发送另一个请求. 对于服务器而言它已经完成了对这个客户端的任务, 它会返回最外层循环等待下一个连接. 
+
+#### while使用 else 语句
+在 python 中，for … else 表示这样的意思，for 中的语句和普通的没有区别，else 中的语句会在循环正常执行完（即 for 不是通过 break 跳出而中断的）的情况下执行，while … else 也是一样。
+
+```
+count = 0
+while count < 5:
+   print count, " is  less than 5"
+   count = count + 1
+else:
+   print count, " is not less than 5"
+```
+结果：
+```
+0 is less than 5
+1 is less than 5
+2 is less than 5
+3 is less than 5
+4 is less than 5
+5 is not less than 5
+```
+
+
 
 ### for
 
@@ -537,7 +651,127 @@ e
 o
 ```
 
-### 推导式
+## 推导式
+推导式是从一个或者多个迭代器快速简洁地创建数据结构的一种方法。他可以讲循环和条件判断结合，从而避免语法冗长的代码。会使用推导式有时可以说明你已经超过 Python初学者的水平。也就是说，使用推导式更像 Python 风格
+
+
+### 列表推导式
+
+你可以从1到5创建一个整数列表，每次增加一项：
+
+```
+>>> number_list = []
+>>> number_list.append(1)
+>>> number_list.append(2)
+>>> number_list.append(3)
+>>> number_list.append(4)
+>>> number_list.append(5)
+>>> number_list
+[1, 2, 3, 4, 5]
+```
+
+或者，可以结合 range() 函数使用一个迭代器：
+
+```
+>>> number_list = []
+>>> for number in range(1, 6):
+...     number_list.append(number)
+...
+>>> number_list
+[1, 2, 3, 4, 5]
+```
+上面这些方法都是可行的Python代码，会得到相同的结果。然而，更像 Python 风格的创建列表方法是列表推导。语法如下：
+
+```
+[ expression for item in iterable ]
+```
+
+将通过列表推导创建一个整数列表：
+
+```
+>>> number_list = [number for number in range(1,6)]
+>>> number_list
+[1, 2, 3, 4, 5]
+```
+在第一行中，第一个 number 变量为列表生成值，也就是说，把循环的结果放在列表 number_list 中。 第二个 number 可以为表达式， 看下下面的例子：
+
+```
+>>> number_list = [number-1 for number in range(1,6)]
+>>> number_list
+[0, 1, 2, 3, 4]
+```
+
+列表推到把循环放在方括号内部。这种例子和之前碰到的不大一样，但却是更为常见的方式。同样，列表推导也可以像下面的例子加上条件表达式：
+
+```
+[expression for item in iterable if condition]
+```
+现在，通过推导创建一个在1到5之间的偶数列表（当 number % 2 为真时，代表奇数；为假时代表偶数）：
+
+```
+>>> a_list = [number for number in range(1,6) if number % 2 == 1]
+>>> a_list
+[1, 3, 5]
+```
+
+正如很多嵌套循环一样，在对应的推导中会有多个for语句，我们先来看一个简单的嵌套循环例子：
+
+```
+>>> rows = range(1,4)
+>>> cols = range(1,3)
+... for row in rows:
+...     for col in cols:
+...         print(row, col)
+...
+1 1
+1 2
+2 1
+2 2
+3 1
+3 2
+```
+使用一次推导，将结果赋值给变量 cells，使 row，col 成为元组：
+
+```
+>>> rows = range(1,4)
+>>> cols = range(1,3)
+>>> cells = [(row, col) for row in rows for col in cols]
+>>> for cell in cells:
+...     print(cell)
+...
+(1, 1)
+(1, 2)
+(2, 1)
+(2, 2)
+(3, 1)
+(3, 2)
+>>>
+```
+另外，在对 cells 列表进行迭代时可以通过元组拆封将变量 row 和 col 的值分别取出：
+
+```
+>>> for row, col in cells:
+...     print(row, col)
+...
+1 1
+1 2
+2 1
+2 2
+3 1
+3 2
+```
+其中，列表推导中 for row ...和 for col ...都可以有自己单独的 if 条件判断。
+
+
+```
+>>> rows = range(1,4)
+>>> cols = range(1,3)
+>>> cells = [(row, col) for row in rows if row % 2 == 1  for col in cols if col % 2 == 1]
+>>> cells
+[(1, 1), (3, 1)]
+>>>
+```
+
 
 # 3.2  id is ==
 Python中的对象包含三要素：id、type、value
@@ -572,8 +806,25 @@ True
 
 > 就 CPython 而言，id 返回的就是运行期内存地址。因此这个标识属阶段性的，不能保证不被重复使用。 但对于其他实现来说，id 返回的未必就是内存地址。
 
+### 字典推导式
 
-  
+### 集合推导式
+
+集合也不例外，同样有推导式。最简单的版本和之前的列表、字典推导类似：
+
+```
+{expression for expression in iterable }
+```
+
+也可以使用条件判断：
+
+```python
+>>> a_set = {number for number in range(1,6) if number % 3 == 1}
+>>> a_set
+{1, 4}
+```
+
+
 # 4. 函数
 
 代码复用的第一步是使用函数，它是命名的用于区分的代码段。函数可以接受任何数字或者其他类型的输入作为参数，并且返回数字或者其他类型的结果。
