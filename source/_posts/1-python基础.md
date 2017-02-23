@@ -1646,8 +1646,8 @@ inside the getter
 ```
 另一种定义属性的方式是使用装饰器（decorator）。下一个例子会定义两个不同的方法，它们都叫 name()，担保函不同的装饰器：
 
-* @property, 用于指定 getter 方法
-* @name.setter, 用于只是 setter 方法
+* @property, 用于指示 getter 方法
+* @name.setter, 用于指示 setter 方法
 
 ```
 >>> class Duck():
@@ -1680,7 +1680,7 @@ inside the getter
 ```
 > 实际上，如果有人能猜到我们在类的内部用的特性名是 hidden_name，他仍然可以直接通过 fowl.hidden_name 进行读写操作。
 
-在前面几个例子中，我们都使用 name 属性指向类中存储的某一特性（在我们的例子中是 hidden_name）。除此之外，属性还可以指向一个计算结果值。我们来定义一个 Circle 类，它包含 radius 特性以及一个计算属性 diameter:
+在前面几个例子中，我们都使用 name 属性指向类中存储的某一特性（在我们的例子中是 hidden_name）。除此之外，属性还可以指向一个计算结果值。我们来定义一个 Circle （圆）类，它包含 radius（半径） 特性以及一个计算属性 diameter（直径）:
 
 ```
 >>> class Circle():
@@ -1721,6 +1721,7 @@ Traceback (most recent call last):
 AttributeError: can't set attribute
 ```
 与直接访问特性相比，使用 property 还有一个巨大的优势，如果你改变了某个特性的定义，只需要在类定义里修改相关代码即可，不需要再每一处调用修改。
+
 
 
 ## 使用名称重整保护私有特性
@@ -1795,7 +1796,7 @@ A has 3 little objects.
 ```
 注意，上面的代码中，我们使用的是 A.count（类特性），而不是 self.count （可能是对象的特性）。在 kids() 方法中，我们使用的是 cls.count，它与 A.count 的作用一样。
 
-类定义中的方法还存在着第三种类型，它既不会影响类也不会影响类的对象。他们出现在类的定义中仅仅是为了方便，否则他们只能孤零零地出现在代码的其他地方，这回影响代码的逻辑性。这种类型的方法被称作静态方法（static method），用 @staticmethod 修饰， 它既不需要 self 参数 也不需要 class 参数。 下面列子中的静态方法是一则 CoyoteWeapon的广告：
+类定义中的方法还存在着第三种类型，它既不会影响类也不会影响类的对象。他们出现在类的定义中仅仅是为了方便，否则他们只能孤零零地出现在代码的其他地方，这会影响代码的逻辑性。这种类型的方法被称作静态方法（static method），用 @staticmethod 修饰， 它既不需要 self 参数 也不需要 class 参数。 下面列子中的静态方法是一则 CoyoteWeapon的广告：
 ```
 >>> class CoyoteWeapon():
 ...     @staticmethod
