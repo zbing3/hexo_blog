@@ -1592,7 +1592,7 @@ attribute   特性
 
 有一些面向对象的语言支持私有特性。这些特性无法从对象外部直接访问，我们需要编写 getter 和 setter 方法对这些私有特征进行读写操作。
 
-Python 不需要 getter 和 setter 方法，因为 Python 里所有特性都是公开的，使用时全凭自觉。如果你不放心直接放问对象的特性，可以为对象编写 setter 和 getter 方法。 但更具Python 风格的解决方案是使用属性(property)。
+Python 不需要 getter 和 setter 方法，因为 Python 里所有特性都是公开的，使用时全凭自觉。如果你不放心直接访问对象的特性，可以为对象编写 setter 和 getter 方法。 但更具Python 风格的解决方案是使用属性(property)。
 
 下面例子中，首先定义一个 Duck 类，他仅包含一个 hidden_name 特性。我们不希望别人能够直接访问这个特性，因此需要定义两个方法：getter 方法（get_name()）和 setter方法（set_name()）。我们在没个方法中都添加一个 print() 函数，这样就能方便地知道它们何时被调用。最后，把这些方法设置为 name 属性：
 
@@ -1890,6 +1890,152 @@ Brook says Babble
                                                    ———— 以为智者
 ```
 
+## 特殊方法
+到目前为止，你已经能创建并使用基本对象了。现在再往深钻研一些。
+
+当我们输入像 a = 3 + 8 这样的表达式时，整数 3 和 8 怎么知道如何实现 + 的？ 同样， a 又是怎么知道如何使用 = 来获取计算结果的？ 你可以使用 Python 的特殊方法（special method），有时魔术方法（magic method）， 来实现这些操作符的功能。别担心，它们一点也不复杂。
+
+这些特殊的方法的名称以双下划线(__)开头和结束。没错，你已经见过其中一个：
+__init__，它根据累的定义以及传入的参数对新创建的对象进行初始化。
+
+假设你有一个简单的 Word 类，现在想要添加一个 equals() 方法来比较两个词是否一致，忽略大小写。也就是说，一个包含值 'ha' 的 Word 对象与包含 'HA' 的是相同的。
+
+下面的代码是第一次尝试，创建一个普通方法 equals()。self.text 是当前 Word 对象所包含的字符串文本，equals() 方法将该字符串与 words （另一个 Word 对象）所包含的字符串做比较：
+
+```
+>>> class Word():
+...     def __init__(self, text):
+...         self.text = text
+...
+...     def equals(self, word2):
+...         return self.text.lower() == word2.text.lower()
+...
+```
+
+接着创建三个包含不通字符串的 Word 对象：
+
+```
+>>> first = Word('ha')
+>>> second = Word('HA')
+>>> third = Word('eh')
+```
+当字符串 'ha' 和 'HA' 被转换为小写形式再进行比较时（我们就是这么做的），他们应该是相等的：
+
+```
+>>> first.equals(second)
+True
+```
+但字符串 'eh' 无论如何与 'ha'也不会相等：
+
+```
+>>> first.equals(third)
+False
+```
+
+我们成功定义了 equals() 方法进行小写转换并比较。但试想一下，如果能通过 if first == second 进行比较的话岂不更妙？这样类会更自然，表现得更像一个 Python 内置的类。 好的，我们来试一下，把前面例子中的 equals() 方法的名称改为 __eq__() ：
+
+```
+>>> class Word():
+...     def __init__(self, text):
+...         self.text = text
+...     def __eq__(self, word2):
+...         return self.text.lower() == word2.text.lower()
+...
+```
+
+修改就此结束，来看看新的版本能否正常工作：
+
+```
+>>> first = Word('ha')
+>>> second = Word('HA')
+>>> third = Word('eh')
+>>> first == second
+True
+>>> first == third
+False
+```
+太神奇了！是不是如同魔术一般？仅需将方法名改为 Python 里进行相等比较的特殊方法名 __eq__() 即可。下面列出一些常用的魔术方法：
+
+和比较相关的魔术方法
+![](/media/14878335329824.jpg)
+
+和数学相关的魔术方法
+![](/media/14878335686210.jpg)
+
+不仅数字类型可以使用像 + （魔术方法 __add__()）和 - （魔术方法 __sub__()）的数学运算符，一些其他的类型也可以使用。例如，Python 的字符类型使用 + 进行拼接，使用 * 进行复制。字符串常见的魔术方法如下：
+![](/media/14878341886394.jpg)
+
+除了 __init__() 外，你会发现在编写类方法时最常用到的是 __str__()，他用于定义如何打印对象信息。print() 方法，str() 方法以及一些字符串格式化的相关方法都会用到 __str__()。交互式解释器则用 __repr__() 方法输出变量。如果在你的类既没有定义 __str__() 也没有定义 __repr__(), Python会输出类似下面这样的默认字符串：
+
+```
+>>> first = Word('ha')
+>>> first
+<__main__.Word object at 0x10a70b908>
+>>> print(first)
+<__main__.Word object at 0x10a70b908>
+```
+
+我们将 __str__() 和 __repr__() 方法都添加到 Word 类里，让输出的对象信息变得更好看些：
+
+```
+>>> class Word():
+...     def __init__(self, text):
+...         self.text = text
+...     def __eq__(self, word2):
+...         return self.text.lower() == word2.text.lower()
+...     def __str__(self):
+...         return self.text
+...     def __repr__(self):
+...         return 'Word(' + self.text + ')'
+...
+...
+>>> first = Word('ha')
+>>> first
+Word(ha)
+>>> print(first)
+ha
+>>>
+```
+更多关于魔术方法的内容请查看 Python 文档 [https://docs.python.org/3/reference/datamodel.html#special-method-names](https://docs.python.org/3/reference/datamodel.html#special-method-names)
+
+## 组合
+如果你想要创建的子类在大多数情况下的行为都和父类相似的话，使用继承是非常不错的选择，建立复杂的继承关系确实很吸引人，但有些时候使用组合（composition）或者聚合（aggregation）更加符合现实的逻辑。一直鸭子是鸟的一种，它有一条尾巴。尾巴并不是鸭子的一种，它是鸭子的组成部分。
+
+```
+>>> class Duck():
+...     def __init__(self, bill, tail):
+...         self.bill = bill
+...         self.tail = tail
+...     def about(self):
+...         print('This duck has a', bill.description, 'bill and a',
+... tail.length, 'tail')
+...
+>>> tail = Tail('long')
+>>> bill = Bill('wide orange')
+>>> duck = Duck(bill, tail)
+>>> duck.about()
+This duck has a wide orange bill and a long tail
+>>>
+```
+
+## 何时使用类和对象而不是模块
+有一些方法可以帮助你决定是把你的代码封装到类里还是模块里。
+
+* 当你需要许多具有相似行为（方法）但不同状态（特性）的实例时，使用对象是最好的选择。
+* 类支持继承，但模块不支持。
+* 如果你想要保证实例的唯一性，使用模块是最好的选择。不管模块在程序中被引用多少次，始终只有一个实例被加载（单例）。
+* 如果你有一系列包含多个值的变量，并且它们能作为参数传入不同的函数，那么最好将它们封装到类里面。举个例子，你可能会使用以 size 和 color 为键的字典代表一张彩色图片。你可以在程序中为每张图片创建不同的字典，并把它们作为参数传递给像 scale() 或者 transform() 之类的函数。但这么做的话，一但你想要添加其他的键或者函数会变得非常麻烦。为了确保统一性，应该定义一个 Image 类，把 size 和 color 作为特性，把 scale() 和 transform 定义为方法。这么一来，关于一张图片的所有数据和可执行的操作都存储在了统一的位置。
+* 用最简单的方式解决问题。使用字典、列表和元组往往要比使用模块更加简单、简洁且快速。而使用类则更为复杂。
+
+创始人 Guido 的建议：
+
+```
+不要过度构建数据结构。尽量使用元组（以及命名元组）而不是对象。尽量使用简单的属性域儿不
+是 getter/setter 函数…… 内置数据类型是你最好的朋友。尽可能多地使用数字、字符串、元
+组、列表、集合以及字典。多看看容器库提供的类型，尤其是双端队列。
+
+                     		                                          —— Guid van Rossum
+```
 
 
 
