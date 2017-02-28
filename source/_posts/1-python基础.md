@@ -678,7 +678,7 @@ def print_lol(the_list):
 
 # 3. 表达式
 
-## 3.1 控制流
+## 控制流
 
 ### if
 
@@ -988,7 +988,25 @@ o
 ```
 
 
-# 3.2  id is ==
+
+### 字典推导式
+
+### 集合推导式
+
+集合也不例外，同样有推导式。最简单的版本和之前的列表、字典推导类似：
+
+```
+{expression for expression in iterable }
+```
+
+也可以使用条件判断：
+
+```python
+>>> a_set = {number for number in range(1,6) if number % 3 == 1}
+>>> a_set
+{1, 4}
+```
+# id is ==
 Python中的对象包含三要素：id、type、value
 其中id返回一个对象的唯一标识，type标识对象的类型，value是对象的值
 is判断的是a对象是否就是b对象，是通过id来判断的
@@ -1020,25 +1038,6 @@ True
 ```
 
 > 就 CPython 而言，id 返回的就是运行期内存地址。因此这个标识属阶段性的，不能保证不被重复使用。 但对于其他实现来说，id 返回的未必就是内存地址。
-
-### 字典推导式
-
-### 集合推导式
-
-集合也不例外，同样有推导式。最简单的版本和之前的列表、字典推导类似：
-
-```
-{expression for expression in iterable }
-```
-
-也可以使用条件判断：
-
-```python
->>> a_set = {number for number in range(1,6) if number % 3 == 1}
->>> a_set
-{1, 4}
-```
-
 
 # 4. 函数
 
@@ -1309,7 +1308,7 @@ StopIteration
 ```
 每次迭代生成器，它会记录上一次调用的位置，并且返回下一个值。这一点和普通的函数是不一样的，一般函数都不记录之前一次调用，而且都会在函数的第一行开始执行。
 
-如果你想创建一个比较大的序列，使用生成器推导的代码会很长，这是可以尝试写一个生成器函数。生成器函数和普通函数类似，但是它的返回值使用 yield 语句声明儿不是 return。下面编写我们自己的 range() 函数版本：
+如果你想创建一个比较大的序列，使用生成器推导的代码会很长，这是可以尝试写一个生成器函数。生成器函数和普通函数类似，但是它的返回值使用 yield 语句声明, 不是 return。下面编写我们自己的 range() 函数版本：
 
 ```
 >>> def my_range(first=0, last=10, step=1):
@@ -1361,800 +1360,116 @@ StopIteration
 
 * 打印输出函数的名字和参数的值
 * 执行含有参数的函数
+* 打印输出结果
+* 返回修改后的函数
+
+看下面代码：
+
+```python
+>>> def document_it(func):
+...     def new_function(*args, **kwargs):
+...         print('Running function:', func.__name__)
+...         print('Positional arguments:', args)
+...         print('Keyword arguments:', kwargs)
+...         result = func(*args, **kwargs)
+...         print('Result:', result)
+...         return result
+...     return new_function
+...
+```
+无论传入 document_it() 函数 func 是什么，装饰器都会返回一个新的函数，其中包含函数 document_it() 增加的额外语句。事实上，装饰器并不需要执行函数 func 中的代码，只是在结束前函数 document_it() 调用函数 func 以便得到 func 的返回结果和附加代码的结果。
+
+那么，如何使用装饰器？当然，可以通过人工赋值：
+
+```
+>>> def add_ints(a, b):
+...     return a + b
+...
+>>> add_ints(3, 5)
+8
+>>> cooler_add_ints = document_it(add_ints) # 人工对装饰器赋值
+>>> cooler_add_ints(3, 5)
+Running function: add_ints
+Positional arguments: (3, 5)
+Keyword arguments: {}
+Result: 8
+8
+```
+
+```
+@decorator
+def func():
+    pass
+```
+
+其解释器会解释成下面这样的语句：
+
+```
+func = decorator(func)
+```
+
+作为对前面人工装饰器赋值的替代，可以直接再要装饰的函数前添加装饰器名字 @decorator_name:
+
+```
+>>> @document_it
+... def add_ints(a, b):
+...     return a + b
+...
+>>> add_ints(3, 5)
+Running function: add_ints
+Positional arguments: (3, 5)
+Keyword arguments: {}
+Result: 8
+8
+```
+同样一个函数可以有多个装饰器。下面，我们写一个对结果求平方的装饰器 square_it():
+
+```python
+>>> def square_it(func):
+...     def new_function(*args, **kwargs):
+...         result = func(*args, **kwargs)
+...         return result * result
+...     return new_function
+...
+```
+靠近函数定义（def 上面）的装饰器最先执行，然后一次执行上面的。任何顺序都会得到相同的最终结果。下面的例子中会看到中间步骤的变化：
+
+```
+>>> @document_it
+... @square_it
+... def add_ints(a, b):
+...     return a + b
+...
+>>> add_ints(3, 5)
+Running function: new_function
+Positional arguments: (3, 5)
+Keyword arguments: {}
+Result: 64
+64
+```
+
+交换两个装饰器的顺序：
+
+```
+>>> @square_it
+... @document_it
+... def add_ints(a, b):
+...     return a + b
+...
+>>> add_ints(3, 5)
+Running function: add_ints
+Positional arguments: (3, 5)
+Keyword arguments: {}
+Result: 8
+64
+```
+
+
 
 
 # 命名空间和作用域
 
-# 5. 类
-
-Python里的所有数据都是以对象形式存在的，无论是的简单的数字类型还是复杂的代码模块。然而，Python特殊的语法形式巧妙地将实现对象机制的大量细节隐藏起来。输入 num = 1 就可以创建一个值为 1 的整数对象，并且将这个对象值赋值给变量num。事实上，在Python中，只有当你想要创建属于自己的对象或者需要修改已有的对象的行为时，才需要关注对象的内部实现细节。
-
-对象既包含数据（变量，更习惯称之为特性，attribute），也包含代码（函数，也成为方法）。它是某一类具体事务的特殊实例。例如，整数 7 就是一个包含了加法、乘法之类方法的对象。整数 8 则是另一个对象。这意味着在 Python 里，7和8都属于一个公共的类，我们称之为整数类。(字符串、list、dict)
-
-当你想要创建一个别人从来没有创建过的新对象时，首先必须定义一个类，用以指明该类的对象所包含的内容（特性和方法）。
-
-可以把对象想象成名词，那么方法就是动词。对象代表着一个独立的事物，它的方法则定义了它是如何与其他事物互相作用的。
-
-与模块不同，你可以同时创建许多同类的对象，他们的特性值可能各不相同。对象就是像是包含了代码的超级数据结构。
-
-## 术语
-
-property   属性 
-attribute   特性 
-
-## 使用 class 定义类
-想要在Python中创建属于自己的类使用关键字 class 来定义，我们先看个例子。
-
-假设你想要定义一些对象用于记录联系人，每个对象对应一个人。首先需要定义 Person 类作为生产对象的模具。在接下来的几个例子中，我们会不停更新这个类的内容，从最简单的开始，知道它成为一个可实际使用的类。
-
-首先创建的是最简单的类，即一个没有任何内容的空类：
-
-```
->>> class Person():
-...     pass
-```
-
-同函数一样，用 pass 表示这个类是一个空类。上面这种定义类的方法已经是最简形式，无法再忽略。你可以通过类名来创建对象，同调用函数一样：
-
-```
->>> someone = Person()
-```
-
-在这个例子中，Person()创建了一个Person类的对象，并给它赋值 someone 这个名字。但是，由于我们的Person类是空的，所以由它创建的对象 someone 实际上什么也做不了。实际编程中，你永远也不会创建这样一个没用的类，我在这里只是为了从零开始引出后面每一步的内容。
-
-我们来试着重新定义一下 Person 类。这一次，将 Python 中特殊的对象初始化方法放入其中：
-
-```
->>> class Person():
-...     def __init__(self):
-...         pass
-```
-
-我承认 __init__() 和 self 看起来很奇怪，但这就是实际的Python类的定义形式。__init__() 是 Python 中一个特殊的函数名，用于根据类的定义创建实例对象。self参数指向了这个正在被创建的对象本身。
-
-当你在类生命定义 __init__() 方法时，第一个参数必须为 self。尽管 self 并不是一个 Python 保留字，但它很常用。
-
-尽管我们添加了初始化方法，但用这个 Person 类创建的对象仍然什么也做不了。接着我们在初始化方法中添加 name 参数：
-
-```
->>> class Person():
-...     def __init__(self, name):
-...         self.name = name
-...
-```
-用 Person 类创建一个对象，为 name 特性传递一个字符串参数：
-
-```
->>> hunter = Person("Elmer Fudd")
-```
-> python执行：
-> Person.__init__(huter, "Elmer Fudd")
-> self 其实就是代表要实例化的对象，这个例子里是 huter。
-
-上面这短短的一行代码实际做了以下工作：
-
-* 查看 Person 类的定义；
-* 在内存中实例化（创建）一个新的对象
-* 调用对象的 __init__ 方法， 将这个新创建的对象作为 self 传入，并将另一个参数（'Elemer-Fudd'）作为 name 传入；
-* 将 name 的值存入对象；
-* 返回这个新的对象；
-* 将名字 hunter 与这个对象关联。
-
-这个新对象与任何其他的python对象一样。 你可以把它当作列表、元组、字典或集合中的元素，也可以把它当作参数传递给函数，或者把它作为函数的返回结果。
-
-我们传入的 name 参数 作为对象的特性存储在了对象里。可以直接对它进行读写操作：
-
-```
->>> print('The mighty hunter: ', hunter.name)
-The mighty hunter:  Elmer Fudd
-```
-记住，在 Person 类定义的内部， 你可以直接通过 self.name 访问 name 特性。 而当创建了一个实际的对象后，例如这里的 hunter，需要通过 hunter.name 来访问他。
-
-在类的定义中， __init__ 并不是必需的。只有当需要区分由该类创建的不同对象时，才需要指定 __init__ 方法。
-
-## 继承
-在你编写代码解决实际问题时，经常能找到一些已有的类，它们能够实现你所需的大部分功能，但不是全部。这时该怎么办？当然，你可以对这个已有的类进行修改，但这么做很容易让代码变得更加复杂，一不留神就可能会破坏原来可以正常工作的功能。
-
-当然，也可以另起炉灶重新编写一个类：复制粘贴原来的代码再融入自己的新代码。但这意味着你需要维护更多的代码。同时，新类和旧类中实现同样功能的代码被分隔在了不同的地方（日后修改时需要改动多处）。
-
-更好的解决方法是利用类的继承：从已有类中衍生出新的类，添加和修改部分功能。这是代码复用的一个绝佳的例子。使用继承得到的新类会自动获得旧类中的多有方法，而不需要进行任何复制。
-
-你只需要在新类里面定义自己额外需要的方法，或者按照需求对继承的方法进行修改即可。修改得到的新方法会覆盖原有的方法。我们习惯将原始的类称为父类、超类或基类，将新的类称作孩子类、子类或衍生类。这些术语在面向对象的编程中不加以区分。
-
-现在，我们来试试继承。首先，定义一个空类 Car。然后，定义一个 Car 的子类 Yugo。定义子类使用的也是 class 关键字，不过需要把父类的名字放在子类名字后面的括号里：
-
-```python
->>> class Car():
-...     pass
-... 
->>> class Yugo(Car):
-...     pass
-... 
-```
-
-接着，为每个类创建一个实力对象：
-
-```python
->>> give_me_a_car = Car()
->>> give_me_a_yugo = Yugo()
-```
-
-子类是父类的一种特殊情况，它属于父类。在面向对象的术语里，我们经常成 Yugo 是一个 Car。 对象 give_me_a_yugo 是 Yugo 类的一个实例，但它同事集成了 Car 能做到的所有事情。当然，上面的例子中 Car 和 Yugo 就像潜艇上的甲板水手一样起不到任何实际作用。我们来更新一下类的定义，让它们发挥点儿作用：
-
-```python
->>> class Car():
-...     def exclaim(self):
-...         print("I'm a Car!")
-...
->>> class Yugo(Car):
-...     pass
-...
->>>
-```
-
-最后，为每一个类各创建一个对象，并调用刚刚声明的 exclaim 方法：
-
-```
->>> give_me_a_car = Car()
->>> give_me_a_yugo = Yugo()
->>> give_me_a_car.exclaim()
-I'm a Car!
->>> give_me_a_yugo.exclaim()
-I'm a Car!
-```
-
-我们不需要进行任何特殊的操作，Yugo 就自动从 Car 那里继承了 exclaim() 方法。但事实上，我们并不希望 Yugo 在 exclaim() 方法里面宣称它是一个 Car，这可能会造成无法区分 Car 和 Yugo。让我们来看看怎么解决这个问题。
-
-## 覆盖方法
-
-新创建的子类会自动继承父类的所有信息。接下来我们来看子类如何替代——覆盖（override）父类的方法。
-
-```
->>> class Car():
-...     def exclaim(self):
-...         print("I'm a Car!")
-...
->>> class Yugo(Car):
-...     def exclaim(self):
-...         print("I'm a Yugo! Much like a Car, but more Yugo-ish.")
-...
-```
-
-为每个类创建一个对象：
-```
->>> give_me_a_car = Car()
->>> give_me_a_yugo = Yugo()
-```
-
-执行看下结果：
-
-```
->>> give_me_a_car.exclaim()
-I'm a Car!
->>> give_me_a_yugo.exclaim()
-I'm a Yugo! Much like a Car, but more Yugo-ish.
-```
-我们覆盖了父类的 exclaim() 方法。 在子类中，可以覆盖任何父类的方法，包括 __init__()。下面我们使用之前的 Person 类。我们来创建两个子类，分别代表医生(MDPerson)和（JDPerson）
-
-```
->>> class Person():
-...     def __init__(self, name):
-...         self.name = name
-...
->>> class MDPerson(Person):
-...     def __init__(self, name):
-...         self.name = "Doctor " + name
-...
->>> class JDPerson(Person):
-...     def __init__(self, name):
-...         self.name = name + ", Esquire"
-...
->>>
-```
-在上面的例子中，子类的初始化方法 __init__() 接受的参数和父类  Person 一样，但存储到对象内部 name 特性的值却不尽相同：
-
-```
->>>  person = Person('Fudd')
->>> doctor = MDPerson('Fudd')
->>> lawyer = JDPerson('Fudd')
->>> print(person.name)
-Fudd
->>> print(doctor.name)
-Doctor Fudd
->>> print(lawyer.name)
-Fudd, Esquire
->>>
-```
-
-## 添加新方法
-
-子类还可以添加父类中没有的方法。回到 Car 类 和 Yugo 类，我们给 Yugo 类添加一个新的方法 need_a_push():
-
-```
->>> class Car():
-...     def exclaim(self):
-...         print("I'm a Car!")
-...
->>> class Yugo(Car):
-...     def exclaim(self):
-...         print("I'm a Yugo! Much like a Car, but more Yugo-ish.")
-...     def need_a_push(self):
-...         print("A little help here?")
-...
-```
-
-接着创建一个 Car 和一个 Yugo 对象：
-
-```
->>> give_me_a_car = Car()
->>> give_me_a_yugo = Yugo()
-```
-Yugo 类的对象可以响应 need_a_push()方法：
-
-```
->>> give_me_a_yugo.need_a_push()
-A little help here?
-```
-
-但父类 Car 无法使用该方法：
-
-```
->>> give_me_a_car.need_a_push()
-Traceback (most recent call last):
-  File "<ipython-input-98-61aca925ea27>", line 1, in <module>
-    give_me_a_car.need_a_push()
-AttributeError: 'Car' object has no attribute 'need_a_push'
-```
-至此，Yugo终于可以做一些 Car 做不到的事情了。它的与众不同的特征开始体现了出来。
-
-## super
-我们已经知道如何在子类中覆盖父类的方法，但如果想要调用父类的方法就要使用 super()。下面的例子将新定义一个新的类 EmailPerson，用于表示有电子邮箱的 Person。首先，来定义熟悉的Person类：
-
-```
->>> class Person():
-...     def __init__(self, name):
-...         self.name = name
-...
-```
-
-下面是子类的定义。注意，子类的初始化方法 __init__() 中添加了一个额外的 email 参数：
-
-```
->>> class EmailPerson(Person):
-...     def __init__(self, name, email):
-...         super().__init__(name)
-...         self.email = email
-...
-```
-在子类中定义 __init__() 方法时，父类的 __init__() 方法会被覆盖。因此在子类中父类的初始化方法并不会被自动调用，我们必须显式调用它。以上代码实际上做了这样几件事情：
-
-* 通过 super() 方法获取了父类 Person 的定义。
-* 子类的 __init__() 调用了 Person.__init__() 方法。它会自动将 self 参数传递给父类。因此，你只需传入其余参数即可。在上面的例子中，Person() 能接受的其余参数指的是 name。
-* self.email = email 这行新的代码才真正起到了将 EmailPerson 与 Person 区分开的作用。
-
-接下来，创建一个 EmailPerson 类的对象：
-
-```
->>> bob = EmailPerson('Bob Frapples', 'bob@frapples.com')
-```
-我们既可以访问 name 特性，也可访问 email 特性：
-
-```
->>> bob.name
-'Bob Frapples'
->>> bob.email
-'bob@frapples.com'
-```
-为什么不像下面这样定义 EmailPerson 类呢？
-
-```python
->>> class EmailPerson(Person):
-...     def __init__(self, name, email):
-...         self.name = name
-...         self.email = email
-...
-```
-
-确实可以这么做，但这有悖我么使用继承的初衷。我们应该使用 super() 来让 Person 完成他应该做的事情，就像任何一个单纯的 Person 对象一样。除此之外，不这么写还有另一个好处，如果 Person 类的定义在未来发生改变，使用 super() 可以保证这些改变会自动体现在 EmailPersion类上，而不需要手动修改。
-
-子类可以按照自己的方式处理问题，但如果人需要借助父类的帮助，使用 super() 是最佳的选择。
-
-
-## self
-
-Python 中经常被争议的一点（除了使用空格外）就是必须把 self 设置为实例方法的第一个参数。Python 使用 self 参数来找到正确的对象所包含的特性和方法。通过下面的例子，我会告诉你调用对象方法背后 Python 实际做的工作。
-
-```
->>> car = Car()
->>> car.exclaim()
-I'm a Car!
-```
-Python 在背后做了一下两件事：
-
-* 查找 car 对象所属的类（Car）；
-* 把 car 对象作为 self 参数传给 Car 类所包含的 exclaim() 方法。
-
-了解调用机制后，为了好玩，我们甚至可以像下面这样进行调用，这与普通的调用语法(car.exclaim())效果完全一致：
-
-```
->>>  Car.exclaim(car)
-I'm a Car!
-```
-当然，我们没有理由使用这种臃肿的语法。
-
-## 使用属性对特性进行访问和设置
-
-property   属性 
-attribute   特性 
-
-有一些面向对象的语言支持私有特性。这些特性无法从对象外部直接访问，我们需要编写 getter 和 setter 方法对这些私有特征进行读写操作。
-
-Python 不需要 getter 和 setter 方法，因为 Python 里所有特性都是公开的，使用时全凭自觉。如果你不放心直接访问对象的特性，可以为对象编写 setter 和 getter 方法。 但更具Python 风格的解决方案是使用属性(property)。
-
-下面例子中，首先定义一个 Duck 类，他仅包含一个 hidden_name 特性。我们不希望别人能够直接访问这个特性，因此需要定义两个方法：getter 方法（get_name()）和 setter方法（set_name()）。我们在没个方法中都添加一个 print() 函数，这样就能方便地知道它们何时被调用。最后，把这些方法设置为 name 属性：
-
-```
->>> class Duck():
-...     def __init__(self, input_name):
-...         self.hidden_name = input_name
-...     def get_name(self):
-...         print('inside the getter')
-...         return self.hidden_name
-...     def set_name(self, input_name):
-...         print('inside the setter')
-...         self.hidden_name = input_name
-...     name = property(get_name, set_name)
-...
-```
-
-这两个新方法在最后一行之前都与普通的 getter 和 setter 方法没有任何区别，最后一行则把这两个方法定义为了 name 属性。 property() 的第一个参数是 getter 方法，第二个参数是 setter 方法。现在，当你尝试访问 Duck 类对象的 name 特性时，get_name()会被自动调用：
-
-```
->>> fowl = Duck('Howard')
->>> fowl.name
-inside the getter
-'Howard'
-```
-当然，也可以显式调用 get_name() 方法，它就像普通的 getter 方法一样：
-
-```
->>> fowl.get_name()
-inside the getter
-'Howard'
-```
-当对 name 特性执行赋值操作时，set_name() 方法会被调用：
-
-```
->>> fowl.name = 'Daffy'
-inside the setter
->>> fowl.name
-inside the getter
-'Daffy'
-```
-也可以显式调用 set_name() 方法：
-
-```
->>> fowl.set_name('Daffy')
-inside the setter
->>> fowl.name
-inside the getter
-'Daffy'
->>>
-```
-另一种定义属性的方式是使用装饰器（decorator）。下一个例子会定义两个不同的方法，它们都叫 name()，担保函不同的装饰器：
-
-* @property, 用于指示 getter 方法
-* @name.setter, 用于指示 setter 方法
-
-```
->>> class Duck():
-...     def __init__(self, input_name):
-...         self.hidden_name = input_name
-...     @property
-...     def name(self):
-...         print('inside the getter')
-...         return self.hidden_name
-...     @name.setter
-...     def name(self, input_name):
-...         print('inside the setter')
-...         self.hidden_name = input_name
-...
-```
-
-你仍然可以像之前访问特性一样访问 name, 但这里没有显式的 get_name() 和 set_name() 方法：
-
-```
->>> fowl = Duck('Howard')
->>> fowl.name
-inside the getter
-'Howard'
->>> fowl.name = 'Donald'
-inside the setter
->>> fowl.name
-inside the getter
-'Donald'
->>>
-```
-> 实际上，如果有人能猜到我们在类的内部用的特性名是 hidden_name，他仍然可以直接通过 fowl.hidden_name 进行读写操作。
-
-在前面几个例子中，我们都使用 name 属性指向类中存储的某一特性（在我们的例子中是 hidden_name）。除此之外，属性还可以指向一个计算结果值。我们来定义一个 Circle （圆）类，它包含 radius（半径） 特性以及一个计算属性 diameter（直径）:
-
-```
->>> class Circle():
-...     def __init__(self, radius):
-...         self.radius = radius
-...     @property
-...     def diameter(self):
-...         return 2 * self.radius
-...
-```
-创建一个 Circle 对象，并给 radius 赋予一个初值：
-
-```
->>> c = Circle(5)
->>> c.radius
-5
-```
-可以像访问特性（例如 radius）一样访问属性 diameter：
-
-```
->>> c.diameter
-10
-```
-真正有趣的还在后面。我们可以随时改变 radius 特性的值，计算属性 diameter 会自动根据新的值更新自己：
-
-```
->>> c.radius = 7
->>> c.diameter
-14
-```
-如果你没有指定某一特性的 setter 属性（@diameter.setter），那么将无法从类的外部对它的值进行设置。这对于那些只读的特性非常有用：
-
-```
->>> c.diameter = 20
-Traceback (most recent call last):
-  File "<ipython-input-22-dd5da562ba9f>", line 1, in <module>
-    c.diameter = 20
-AttributeError: can't set attribute
-```
-与直接访问特性相比，使用 property 还有一个巨大的优势，如果你改变了某个特性的定义，只需要在类定义里修改相关代码即可，不需要再每一处调用修改。
-
-
-
-## 使用名称重整保护私有特性
-前面的 Duck 列子中， 为了隐藏内部特性，我们曾将其命名为 hidden_name 。 其实，Python 对那些需要刻意隐藏在类内部的特性有自己的命名规范：
-由连续的两个下划线开头（__）。
-
-我们来把 hidden_name 改名为 __name，如下所示：
-
-```
-
->>> class Duck():
-...     def __init__(self, input_name):
-...         self.__name = input_name
-...     @property
-...     def name(self):
-...         print('inside the getter')
-...     @name.setter
-...     def name(self, input_name):
-...         print('inside the setter')
-...         self.__name = input_name
-...
-```
-看看代码是否还能正常工作：
-
-```
->>> fowl = Duck('Howard')
->>> fowl.name
-inside the getter
-'Howard'
->>> fowl.name = 'Donald'
-inside the setter
->>> fowl.name
-inside the getter
-'Donald'
-```
-看起来没问题，现在，你无法在外部访问 __name 特性了：
-
-```
->>> fowl.__name
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-AttributeError: 'Duck' object has no attribute '__name'
-```
-
-这种命名规范本质上并没有把特性变成私有，但Python确实将它的名字重整了。让外部的代码无法使用。如果你是在好奇名称重整是怎么实现的。我可以偷偷告诉你其中的奥秘：
-
-```
->>> fowl._Duck__name
-'Donald'
-```
-
-发现了么？我们并没有得到 inside the getter，成功绕过了 getter 方法。尽管如我们所见，这种保护特性的方式并不完美，但它确实能在一定程度上避免我们无意或有意地对特性进行直接访问。
-
-## 方法的类型
-有些数据（特性）和函数（方法）是类本身的一部分，还有一些是由类创建的实例的一部分。
-
-在类的定义中，以 self 作为第一个参数的方法都是实例方法（instance method）。它们在创建自定义类时最常用。实例方法的首个参数是 self，当它被调用时，Python 会把调用该方法的对象作为 self 参数传入。
-
-与之相对，类方法（class method）会作用于整个类，对类作出的任何改变会对它的所有实例对象产生影响。在类定义内部，用前缀修饰符 @classmethod 指定的方法都是类方法。与实例方法相似，类方法的第一个参数是类本身。在Python中，这个采纳数常被写作 cls，因为全称 class 是保留字，在这里我们无法使用。下面的例子中，我们为A定义一个类方法来记录一共有多少个类A的对象被创建：
-
-```
->>> class A():
-...     count = 0
-...     def __init__(self):
-...         A.count += 1
-...     def exclaim(self):
-...         print("I'm an A!")
-...     @classmethod
-...     def kids(cls):
-...         print("A has", cls.count, "little objects.")
-...
->>> easy_a = A()
->>> breezy_a = A()
->>> wheezy_a = A()
->>> A.kids()
-A has 3 little objects.
-```
-
-注意，上面的代码中，我们使用的是 A.count（类特性），而不是 self.count （可能是对象的特性）。在 kids() 方法中，我们使用的是 cls.count，它与 A.count 的作用一样。
-
-类定义中的方法还存在着第三种类型，它既不会影响类也不会影响类的对象。他们出现在类的定义中仅仅是为了方便，否则他们只能孤零零地出现在代码的其他地方，这会影响代码的逻辑性。这种类型的方法被称作静态方法（static method），用 @staticmethod 修饰， 它既不需要 self 参数 也不需要 class 参数。 下面列子中的静态方法是一则 CoyoteWeapon的广告：
-
-```
->>> class CoyoteWeapon():
-...     @staticmethod
-...     def commercial():
-...         print('This CoyoteWeapon has been brought to you by Acme')
-...
->>> CoyoteWeapon.commercial()
-This CoyoteWeapon has been brought to you by Acme
->>>
-```
-
-注意，在这个例子中，我们甚至都不用创建任何 CoyoteWeapon 类的对象就可以调用这个方法，语法优雅不失风格！
-
-## 鸭子类型
-
-Python 对实现多态（polymorphism）要求得十分宽松，这意味着我们可以对不同对象调用同名的操作，甚至与用管这些对象的类型是什么。
-
-我们来为上那个 Quote 类设定同样的初始化方法 __init__()，然后再添加两个新函数：
-
-* who() 返回保存的 person 字符串的值
-* says() 返回保存的 words 字符串的内容，并添上指定的表点符号。
-
-它们的具体实现如下所示：
-
-```
->>> class Quote():
-...     def __init__(self, person, words):
-...         self.person = person
-...         self.words = words
-...     def who(self):
-...         return self.person
-...     def says(self):
-...         return self.words + '.'
-...
->>> class QuestionQuote(Quote):
-...     def says(self):
-...         return self.words + '?'
-...
->>> class ExclamationQuote(Quote):
-...     def says(self):
-...         return self.words + '!'
-...
->>>
-```
-
-我们不需要改变 QuestionQuote 或者 ExclamQuote 的初始化方式，因此没有覆盖它们的 __init__()方法。Python 会自动调用父类 Quote 的初始化函数 __init__() 来存储实例变量 person 和 words，这就是我们可以在子类 QuestionQuote 和 ExclamationQuote 的对象里访问 self.words 的原因。
-
-接下来创建一些对象：
-
-```
->>> hunter = Quote('Elmer Fudd', "I'm hunting wabbits")
->>> print(hunter.who(), 'says:', hunter.says())
-Elmer Fudd says: I'm hunting wabbits.
-
->>> hunted1 = QuestionQuote('Bugs Bunny', "What's up, doc")
->>> print(hunted1.who(), 'says:', hunted1.says())
-Bugs Bunny says: What's up, doc?
-
->>> hunted2 = ExclamationQuote('Daffy Duck', "It's rabbit season")
->>> print(hunted2.who(), 'says:', hunted2.says())
-Daffy Duck says: It's rabbit season!
-```
-三个不同版本的 says() 为上面三种类型提供了不同的相应方式，这是面向对象的语言中多态的传统形式。Python 在这方面走的更远一些，无论对象的种类是什么，只要包含 who() 和 says()，你便可以调用它。我们再来定义一个 BabblingBrook 类，他与我们之前的猎人猎物（Quote 类的后代）什么的没有任何关系：
-
-```
->>> class BabblingBrook():
-...     def who(self):
-...         return 'Brook'
-...     def says(self):
-...         return 'Babble'
-...
->>> brook = BabblingBrook()
-```
-现在，对不同对象执行 who() 和 says() 方法，其中有一个（brook） 与其他类型的对象毫无关联：
-
-```
->>> def who_says(obj):
-...     print(obj.who(), 'says', obj.says())
-...
->>> who_says(hunter)
-Elmer Fudd says I'm hunting wabbits.
->>> who_says(hunted1)
-Bugs Bunny says What's up, doc?
->>> who_says(hunted2)
-Daffy Duck says It's rabbit season!
->>> who_says(brook)
-Brook says Babble
-```
-
-这种方式有事被称作鸭子类型（duck typing），这个命名源自一句名言：
-
-```
-  如果它想鸭子一样走路，像样子一样叫，那么它就是一直鸭子。
-                                                   ———— 以为智者
-```
-
-## 特殊方法
-到目前为止，你已经能创建并使用基本对象了。现在再往深钻研一些。
-
-当我们输入像 a = 3 + 8 这样的表达式时，整数 3 和 8 怎么知道如何实现 + 的？ 同样， a 又是怎么知道如何使用 = 来获取计算结果的？ 你可以使用 Python 的特殊方法（special method），有时魔术方法（magic method）， 来实现这些操作符的功能。别担心，它们一点也不复杂。
-
-这些特殊的方法的名称以双下划线(__)开头和结束。没错，你已经见过其中一个：
-__init__，它根据类的定义以及传入的参数对新创建的对象进行初始化。
-
-假设你有一个简单的 Word 类，现在想要添加一个 equals() 方法来比较两个词是否一致，忽略大小写。也就是说，一个包含值 'ha' 的 Word 对象与包含 'HA' 的是相同的。
-
-下面的代码是第一次尝试，创建一个普通方法 equals()。self.text 是当前 Word 对象所包含的字符串文本，equals() 方法将该字符串与 words （另一个 Word 对象）所包含的字符串做比较：
-
-```
->>> class Word():
-...     def __init__(self, text):
-...         self.text = text
-...
-...     def equals(self, word2):
-...         return self.text.lower() == word2.text.lower()
-...
-```
-
-接着创建三个包含不通字符串的 Word 对象：
-
-```
->>> first = Word('ha')
->>> second = Word('HA')
->>> third = Word('eh')
-```
-当字符串 'ha' 和 'HA' 被转换为小写形式再进行比较时（我们就是这么做的），他们应该是相等的：
-
-```
->>> first.equals(second)
-True
-```
-但字符串 'eh' 无论如何与 'ha'也不会相等：
-
-```
->>> first.equals(third)
-False
-```
-
-我们成功定义了 equals() 方法进行小写转换并比较。但试想一下，如果能通过 if first == second 进行比较的话岂不更妙？这样类会更自然，表现得更像一个 Python 内置的类。 好的，我们来试一下，把前面例子中的 equals() 方法的名称改为 __eq__() ：
-
-```
->>> class Word():
-...     def __init__(self, text):
-...         self.text = text
-...     def __eq__(self, word2):
-...         return self.text.lower() == word2.text.lower()
-...
-```
-
-修改就此结束，来看看新的版本能否正常工作：
-
-```
->>> first = Word('ha')
->>> second = Word('HA')
->>> third = Word('eh')
->>> first == second
-True
->>> first == third
-False
-```
-太神奇了！是不是如同魔术一般？仅需将方法名改为 Python 里进行相等比较的特殊方法名 __eq__() 即可。下面列出一些常用的魔术方法：
-
-和比较相关的魔术方法
-![](/media/14878335329824.jpg)
-
-和数学相关的魔术方法
-![](/media/14878335686210.jpg)
-
-不仅数字类型可以使用像 + （魔术方法 __add__()）和 - （魔术方法 __sub__()）的数学运算符，一些其他的类型也可以使用。例如，Python 的字符类型使用 + 进行拼接，使用 * 进行复制。字符串常见的魔术方法如下：
-![](/media/14878341886394.jpg)
-
-除了 __init__() 外，你会发现在编写类方法时最常用到的是 __str__()，他用于定义如何打印对象信息。print() 方法，str() 方法以及一些字符串格式化的相关方法都会用到 __str__()。交互式解释器则用 __repr__() 方法输出变量。如果在你的类既没有定义 __str__() 也没有定义 __repr__(), Python会输出类似下面这样的默认字符串：
-
-```
->>> first = Word('ha')
->>> first
-<__main__.Word object at 0x10a70b908>
->>> print(first)
-<__main__.Word object at 0x10a70b908>
-```
-
-我们将 __str__() 和 __repr__() 方法都添加到 Word 类里，让输出的对象信息变得更好看些：
-
-```
->>> class Word():
-...     def __init__(self, text):
-...         self.text = text
-...     def __eq__(self, word2):
-...         return self.text.lower() == word2.text.lower()
-...     def __str__(self):
-...         return self.text
-...     def __repr__(self):
-...         return 'Word(' + self.text + ')'
-...
-...
->>> first = Word('ha')
->>> first
-Word(ha)
->>> print(first)
-ha
->>>
-```
-
-更多关于魔术方法的内容请查看 Python 文档 [https://docs.python.org/3/reference/datamodel.html#special-method-names](https://docs.python.org/3/reference/datamodel.html#special-method-names)
-
-## 组合
-如果你想要创建的子类在大多数情况下的行为都和父类相似的话，使用继承是非常不错的选择，建立复杂的继承关系确实很吸引人，但有些时候使用组合（composition）或者聚合（aggregation）更加符合现实的逻辑。一只鸭子是鸟的一种，它有一条尾巴。尾巴并不是鸭子的一种，它是鸭子的组成部分。
-
-```
->>> class Tail():
-...     def __init__(self, length):
-...         self.length = length
-
->>> class Bill():
-...     def __init__(self, description):
-...         self.description = description
-
->>> class Duck():
-...     def __init__(self, bill, tail):
-...         self.bill = bill
-...         self.tail = tail
-...     def about(self):
-...         print('This duck has a', bill.description, 'bill and a',
-... tail.length, 'tail')
-...
->>> tail = Tail('long')
->>> bill = Bill('wide orange')
->>> duck = Duck(bill, tail)
->>> duck.about()
-This duck has a wide orange bill and a long tail
->>>
-```
-
-## 何时使用类和对象而不是模块
-有一些方法可以帮助你决定是把你的代码封装到类里还是模块里。
-
-* 当你需要许多具有相似行为（方法）但不同状态（特性）的实例时，使用对象是最好的选择。
-* 类支持继承，但模块不支持。
-* 如果你想要保证实例的唯一性，使用模块是最好的选择。不管模块在程序中被引用多少次，始终只有一个实例被加载（单例）。
-* 如果你有一系列包含多个值的变量，并且它们能作为参数传入不同的函数，那么最好将它们封装到类里面。举个例子，你可能会使用以 size 和 color 为键的字典代表一张彩色图片。你可以在程序中为每张图片创建不同的字典，并把它们作为参数传递给像 scale() 或者 transform() 之类的函数。但这么做的话，一但你想要添加其他的键或者函数会变得非常麻烦。为了确保统一性，应该定义一个 Image 类，把 size 和 color 作为特性，把 scale() 和 transform 定义为方法。这么一来，关于一张图片的所有数据和可执行的操作都存储在了统一的位置。
-* 用最简单的方式解决问题。使用字典、列表和元组往往要比使用模块更加简单、简洁且快速。而使用类则更为复杂。
-
-创始人 Guido 的建议：
-
-```
-不要过度构建数据结构。尽量使用元组（以及命名元组）而不是对象。尽量使用简单的属性域儿不
-是 getter/setter 函数…… 内置数据类型是你最好的朋友。尽可能多地使用数字、字符串、元
-组、列表、集合以及字典。多看看容器库提供的类型，尤其是双端队列。
-
-                     		                                          —— Guid van Rossum
-```
-
-
-
+# 5. [类](http://opslinux.com/2017/02/25/5-%E7%B1%BB/)
 
 
 # 6. [文件异常](http://opslinux.com/2017/02/15/6-%E6%96%87%E4%BB%B6%E4%B8%8E%E5%BC%82%E5%B8%B8/)
@@ -2163,7 +1478,604 @@ This duck has a wide orange bill and a long tail
 
 # 7. 模块
 
+# 8.标准库
+Python 的一个显著特点是具有庞大的模块标准库，这些模块可以执行很多有用的任务，并且和核心 Python 语言分开以避免臃肿。我们开始写代码时，首先要检查是否存在想要的标准模块。在标准库中你会经常碰到一些"珍宝"！
+
+关于标准库的学习资料：
+
+* python 标准库
+* [python cookbook](http://python3-cookbook.readthedocs.io/zh_CN/latest/index.html)
+* 模块官方文档 https://docs.python.org/3/library 以及使用指南 https://docs.python.org/3.3/tutorial/stdlib.html
+* Doug Hellmann 的网站 Python Module of the week（[https://pymotw.com/3/](https://pymotw.com/3/)）
+
+一般标准库里涉及数据结构、网络、系统、数据库等模块。下面来学习一些常用的标准模块。
 
 
 
+## 使用 setdefault() 和 defaultdic() 处理缺失的键 
+
+## 使用 Counter() 计数
+
+## 使用有序字典 OrderedDict() 按键排序
+
+## 双端队列：栈+队列
+
+## 使用 itertools 迭代代码结构
+
+## 使用 pprint() 友好输出
+
+# 基础课实战
+
+密码管理器
+
+* 主密码(retry 3次 给一个提示) 加密
+* 保存密码
+    * 密码 title
+    * 真实的密码 （加密）
+* 自动生成安全密码 （用户可以输入长度）
+* 密码分类
+    * web
+    * 应用
+    * 银行
+    * 服务器
+* 获取密码
+* 密码文件的云备份   
+
+
+# 第三方库
+
+## 运维常用的第三方库
+
+# psutil
+系统性能信息模块
+psutil是一个跨平台库，能够轻松的实现获取系统运行的进程和系统利用率（包括CPU、内存、磁盘、网络等）信息。它主要应用于系统监控，分析和限制系统资源及进程的管理。它实现了同等命令行工具提供的功能，如ps、top、lsof、netstat、ifconfig、who、df、kill、free、nice、ionice、iostat、iotop、uptime、pidof、tty、taskset、pmap等。目前支持32位和64位的Linux、Windows、OS X、FreeBSD和Sun Solaris等操作系统，支持从2.6 到 3.5的Python版本，目前最新版本为5.1.3。
+
+项目地址：https://github.com/giampaolo/psutil
+
+## 安装
+
+```
+pip install psutil
+```
+## CPU
+
+```
+#显示所有逻辑CPU信息。
+psutil.cpu_times(percpu=True)
+#获取CPU的逻辑个数
+psutil.cpu_count()
+#获取物理cpu个数
+psutil.cpu_count(logical=False)
+
+```
+
+## Memory
+
+```
+#内存信息
+psutil.virtual_memory()
+#获取内存总数
+psutil.virtual_memory().total
+#获取空闲内存数
+psutil.virtual_memory().free
+#获取swap信息
+psutil.swap_memory()
+```
+
+## Disks
+
+```
+#磁盘信息
+psutil.disk_partitions(all=True)
+#获取分区参数
+psutil.disk_usage('/')
+#获取磁盘IO个数
+psutil.disk_io_counters()
+```
+
+## Network
+
+```
+#获取网络总的IO信息
+psutil.net_io_counters()
+#获取每个网络接口的io信息
+psutil.net_io_counters(pernic=True)
+```
+
+## Other system info
+
+```
+#返回当前用户登录信息
+psutil.users()
+#获取开机时间（以时间戳的方式）
+psutil.boot_time()
+#让人能看懂
+import datetime
+datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
+```
+
+## Process management
+
+```
+# 进程信息
+psutil.pids() #获取所有进程的PID
+p = psutil.Process(2128) #实例化一个Process对象，参数为一个进程PID
+p.name() #进程名
+p.exe() #经常bin路径
+p.cwd() #进程工作目录路径
+p.status() #进程状态
+p.create_time() #进程创建时间，时间戳格式
+p.uids() #进程uid信息
+p.gids() #进程gid信息
+p.cpu_times() #进程cpu时间信息，包括use,system两个时间
+p.cpu_affinity() #get进程CPU亲合度，如果设置了进程cpu的亲和度，降CPU号作为参数即可
+p.memory_percent() #进程内存利用率
+p.memory_info() #进程内存rss.vms信息
+p.io_counters() #进程IO信息，包括读写IO数及字节数
+p.connections() #返回打开进程socket的namedutples列表，包括fs、family、laddr等信息
+p.num_threads() #进程开启的线程数
+
+#popen类的使用
+from subprocess import PIPE
+#通过psutil的popen方法启动的应用程序，可以跟踪程序运行的所有相关信息
+p = psutil.Popen(['/usr/bin/python','-c','print ("hello")'],stdout=PIPE)
+p.name()
+p.username()
+p.communicate()
+p.cpu_times()
+```
+
+
+# Ipy
+IP地址处理模块
+IP地址规划是网络设计中非常重要的一个环节，规划的好坏会直接影响路由协议算法的效率，包括网络性能、可扩展性等方面，在这个过程当中，免不了要计算大量的IP地址，包括网段、网络掩码、广播地址、子网数、IP类型等。
+
+官方地址： https://github.com/autocracy/python-ipy
+
+## 安装
+
+版本号 0.83
+
+```
+pip install IPy
+```
+
+IPy模块包含IP类，使用它可以方便处理绝大部分格式为IPv6及IPv4的网络和地址。比如通过version方法就可以区分出IPv4与IPv6，如：
+
+```
+from IPy import IP
+IP('192.168.1.0/24').version()
+IP('::1').version()
+
+ip = IP('192.168.0.0/16')
+ip.len() #输出192.168.0.0网段的ip个数
+for x in ip:
+    print(x)
+
+test_ip = IP('192.168.17.8')
+test_ip.reverseName() #反向解析地址格式
+test_ip.iptype() #192.168.17.8为私网类型'PRIVATE'
+IP('8.8.8.8').iptype() #8.8.8.8 为公网类型
+IP('8.8.8.8').int() #转换为整形格式
+IP('8.8.8.8').strHex() #转换为16进制
+IP('8.8.8.8').strBin() #转换为2进制
+IP(0x8080808) #16进制转换成IP格式
+```
+
+IP方法也支持网络地址的转换，例如根据IP与掩码生产网段格式，如下：
+
+```
+>>> from IPy import IP
+>>> IP('192.168.1.0').make_net('255.255.255.0')
+IP('192.168.1.0/24')
+>>> IP('192.168.1.0/255.255.255.0', make_net=True)
+IP('192.168.1.0/24')
+>>> IP('192.168.1.0-192.168.1.255', make_net=True)
+IP('192.168.1.0/24')
+```
+也可以通过strNormal方法指定不同wantprefixlen参数值以定制不同输出类型的网段。输出类型为字符串，如下：
+
+```
+>>>IP('192.168.1.0/24').strNormal(0)
+'192.168.1.0'
+>>>IP('192.168.1.0/24').strNormal(1)
+'192.168.1.0/24'
+>>>IP('192.168.1.0/24').strNormal(2)
+'192.168.1.0/255.255.255.0'
+>>>IP('192.168.1.0/24').strNormal(3)
+'192.168.1.0-192.168.1.255'
+```
+
+示例　根据输入的IP或子网返回网络、掩码、广播、反向解析、子网数、IP类型等信息。
+
+```
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
+from IPy import IP
+
+ip_s = input('请输入一个ip或 网段地址：')
+ips = IP(ip_s)
+if len(ips) > 1:
+    print('net: %s' % ips.net()) #输出网络地址
+    print('netmask: %s' % ips.netmask()) #输出网络地址掩码
+    print('broadcast: %s' % ips.broadcast()) #输出网络广播地址
+    print('reverse adress: %s' % ips.reverseName()[0]) #输出地址反向解析
+    print('subnet: %s' %len(ips)) #输出网络子网数
+else: #为单个ip地址
+    print('reverse adress: %s' % ips.reverseName()[0])
+print('十六进制地址：%s' % ips.strHex())
+print('二进制地址：%s' % ips.strBin())
+print('IP地址类型：%s' % ips.iptype())
+```
+
+
+
+# dnspython
+DNS处理模块
+dnspython（http://www.dnspython.org/） 是Python实现的一个DNS工具包，它支持几乎所有的记录类型，可以用于查询、传输并动态更新ZONE信息，同时支持TSIG（事务签名）验证消息和EDNS0（扩展DNS）。在系统管理方面，我们可以利用其查询功能来实现DNS服务监控以及解析结果的校验，可以代替nslookup及dig等工具，轻松做到与现有平台的整合。
+
+项目地址：https://github.com/rthalley/dnspython
+
+安装： 
+
+```
+pip install dnspython
+```
+最新版本 dnspython-1.15.0
+
+dnspython模块提供了大量的DNS处理方法，最常用的方法是域名查询。dnspython提供了一个DNS解析器类—resolver，使用它的query方法来实现域名的查询功能。query方法的定义如下：
+
+```
+query(self, qname, rdtype=1, rdclass=1, tcp=False, source=None, raise_on_no_answer=True, source_port=0)
+```
+* qname参数为查询的域名。
+* rdtype参数用来指定RR资源的类型，常用的有以下几种：
+    * A记录，将主机名转换成IP地址；
+    * MX记录，邮件交换记录，定义邮件服务器的域名；
+    * CNAME记录，指别名记录，实现域名间的映射；
+    * NS记录，标记区域的域名服务器及授权子域；
+    * PTR记录，反向解析，与A记录相反，将IP转换成主机名；
+    * SOA记录，SOA标记，一个起始授权区的定义。
+* rdclass参数用于指定网络类型，可选的值有IN、CH与HS，其中IN为默认，使用最广泛。tcp参数用于指定查询是否启用TCP协议，默认为False（不启用）。
+* source与source_port参数作为指定查询源地址与端口，默认值为查询设备IP地址和0。
+* raise_on_no_answer参数用于指定当查询无应答时是否触发异常，默认为True。
+
+## A记录查询
+
+```
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
+import dns.resolver
+domain = raw_input('Please input an domain: ')    #输入域名地址
+A = dns.resolver.query(domain, 'A')    #指定查询类型为A记录
+for i in A.response.answer:   #通过response.answer方法获取查询回应信息
+        print(i)
+```
+
+## mx记录查询
+
+```
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
+import dns.resolver
+domain = raw_input("Please input an domain:")
+MX = dns.resolver.query(domain,'MX')#指定查询记录类型为mx
+for i in MX:
+    print（'MX preference=', i.preference, ' mail exchanger=', i.exchange）
+```
+
+## NS记录查询
+只限输入一级域名，baidu.com。
+
+```
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
+import dns.resolver
+domain = raw_input("Please input an domain:")
+ns = dns.resolver.query(domain,'NS') #指定查询类型为NS记录
+for i in ns.response.answer:
+    for j in i.items:
+        print j.to_text()
+```
+
+CNAME记录查询
+
+```
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
+import dns.resolver
+domain = raw_input("Please input an domain:")
+cname = dns.resolver.query(domain,'CNAME') #指定查询类型为CNAME记录
+for i in cname.response.answer:
+    for j in i.items:
+        print j.to_text()
+```
+结果返回cname后的目标域名。
+
+## DNS域名轮询业务监控
+
+```
+#!/usr/bin/env python
+# coding=utf-8
+
+import dns.resolver
+# import httplib
+import http.client
+
+iplist = []  # 定义域名IP列表变量
+appdomain = "jingfengjiaoyu.com"  # 定义业务域名
+
+def get_iplist(domain=""):  # 域名解析函数，解析成功IP将被追加到iplist
+    try:
+        A = dns.resolver.query(domain, 'A')  # 解析A记录类型
+    except Exception as e:
+        print("dns resolver error:" + str(e))
+        return
+    for i in A.response.answer:
+        for j in i.items:
+            iplist.append(j.address)  # 追加到iplist
+    return True
+
+
+def checkip(ip):
+    checkurl = ip + ":80"
+    getcontent = ""
+    http.client.socket.setdefaulttimeout(5)  # 定义http连接超时时间(5秒)
+    conn = http.client.HTTPConnection(checkurl)  # 创建http连接对象
+
+    try:
+        conn.request("GET", "/", headers={"Host": appdomain})  # 发起URL请求，添
+        # 加host主机头
+        r = conn.getresponse()
+        getcontent = r.read(7)  # 获取URL页面前15个字符，以便做可用性校验
+        print(getcontent)
+    finally:
+        if getcontent == "<html>":  # 监控URL页的内容一般是事先定义好的，比如 “HTTP200”等
+            print(ip + " [OK]")
+        else:
+            print(ip + " [Error]")  # 此处可放告警程序，可以是邮件、短信通知
+
+
+if __name__ == "__main__":
+    if get_iplist(appdomain) and len(iplist) > 0:  # 条件：域名解析正确且至少返回一个IP
+        for ip in iplist:
+            checkip(ip)
+    else:
+        print("dns resolver error.")
+
+```
+
+# paramiko
+模仿ssh登录执行命
+
+官方网站：http://www.paramiko.org/
+项目网站：https://github.com/paramiko/paramiko
+
+## 安装
+
+```
+pip install paramiko
+```
+paramiko-2.1.2
+
+## 连接服务器
+
+### 用户名和密码连接
+
+```
+import paramiko
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy()) #作用是允许连接不在know_hosts文件中的主机
+ssh.connect('139.199.228.59', 22, 'root', '!@#)(*WGK')
+stdin,stdout,stderr = ssh.exec_command('df -h\nls')
+stdout.read()
+ssh.close()
+```
+
+### 上传和下载文件
+
+```
+import paramiko
+import os,sys
+t = paramiko.Transport(('192.168.17.248',22))
+t.connect(username='root',password='123456')
+sftp = paramiko.SFTPClient.from_transport(t)
+#上传
+sftp.put('D:\log.conf','/tmp/log.conf')
+#下载
+sftp.get('/tmp/ks-script-mZm5Oi','D:\ks-script-mZm5Oi')
+t.close()
+```
+
+## 通过公私钥免密码SSH连接服务器
+
+#公私钥生成
+
+```
+ssh-keygen -t rsa  # 生成密钥
+ssh-copy-id -i ~/ssh/id_rsa.pub root@192.168.17.258  # 将本机的公钥复制到远程机器的authorized_keys文件中，ssh-copy-id也能让你有到远程机器的home, ~./ssh , 和 ~/.ssh/authorized_keys的权利
+
+import paramiko
+
+private_key_path = '/home/auto/.ssh/id_rsa'
+key = paramiko.RSAKey.from_private_key_file(private_key_path)
+
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect('192.168.17.258 ', 22, 'root', key)
+
+stdin, stdout, stderr = ssh.exec_command('df')
+print stdout.read()
+ssh.close();
+```
+
+paramiko sftp —— SSH上传和下载文件
+
+```
+import paramiko
+#建立一个加密的管道
+scp=paramiko.Transport(('192.168.0.102', 22))
+#建立连接
+scp.connect(username='root',password='361way')
+#建立一个sftp客户端对象，通过ssh transport操作远程文件
+sftp=paramiko.SFTPClient.from_transport(scp)
+#Copy a remote file (remotepath) from the SFTP server to the local host
+sftp.get('/root/testfile','/tmp/361way')
+#Copy a local file (localpath) to the SFTP server as remotepath
+sftp.put('/root/crash-6.1.6.tar.gz','/tmp/crash-6.1.6.tar.gz')
+scp.close()
+```
+一个目录下多个文件上传下载的示例：
+
+```
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+import paramiko,datetime,os
+hostname='139.199.228.59'
+username='root'
+password='!@#)(*WGK1'
+port=22
+local_dir='/tmp/getfile'
+remote_dir='/tmp/abc'
+try:
+    t=paramiko.Transport((hostname,port))
+    t.connect(username=username,password=password)
+    sftp=paramiko.SFTPClient.from_transport(t)
+    files=sftp.listdir(remote_dir)
+    for f in files:
+        print ''
+        print '#########################################'
+        print 'Beginning to download file  from %s  %s ' % (hostname,datetime.datetime.now())
+        print 'Downloading file:',os.path.join(remote_dir,f)
+        sftp.get(os.path.join(remote_dir, f),os.path.join(local_dir, f))#下载
+        #sftp.put(os.path.join(local_dir, f),os.path.join(remote_dir, f))#上传
+        print 'Download file success %s ' % datetime.datetime.now()
+        print ''
+        print '##########################################'
+    t.close()
+except Exception:
+       print "connect error!"  
+```
+
+注：本处的目录下所有文件进行下载或上传的示例中，在遇到目录下还有嵌套的目录存在时，会将目录也当做文件进行处理，所以如果想要更加的完美的话，可以通过引入stat模块下的S_ISDIR方法进行处理
+
+
+
+# pexpect
+pexpect 是linux下expect的python封装，通过pexpect我们可以实现对ssh、ftp、password、telnet等命令进行自动交互，无需人工达到自动化需求。
+
+项目地址：https://github.com/pexpect/pexpect
+
+安装：
+
+```
+pip install pexpect
+```
+
+## 登陆脚本
+```
+#!/usr/bin/env python
+# coding=utf-8
+
+
+import pexpect 
+
+username = 'root'
+ip = '139.199.228.59'
+child.interact()mypassword = '!@#)(*WGK1'
+
+child = pexpect.spawn('ssh {0}@{1}'.format(username, ip))
+child.expect ('password:')
+child.sendline (mypassword)
+child.expect('$')
+child.sendline('sudo -s')
+child.expect (':')
+child.sendline (mypassword)
+child.expect('#')
+child.sendline('ls -la')
+child.expect('#')
+print child.before   # Print the result of the ls command.
+child.interact()     # Give control of the child to the user.
+child.close()
+```
+
+
+
+
+# fabric
+Fabric是基于python2.5及以上版本实现的SSH命令行工具，简化了SSH应用程序部署及系统管理任务，他提供了系统基础的操作组件，可以实现本地或远程shell命令，包括命令执行、文件上传、下载及完整执行日志输出等功能。Fabric在paramiko的基础上做更高一层的封装，操作起来更加简单。
+官网地址：http://www.fabfile.org/
+项目地址：https://github.com/fabric/fabric/
+
+2.0 支持 python3
+
+fab的常用参数
+
+```
+Usage: fab [options] <command>[:arg1,arg2=val2,host=foo,hosts='h1;h2',...] ...
+```
+
+* -l,显示定义好的任务函数名；
+* -f,指定fab入口文件，默认入口文件名为fabfile.py
+* -g,指定网关（中转）设备，比如堡垒机环境，填写堡垒机ip即可
+* -H,指定目标主机，多台主机用“，”号分隔；
+* -P,以异步并行方式运行多主机任务，默认为串行运行；
+* -R,指定role，以角色名区分不同业务组设备；
+* -t，设置设备连接超时时间（秒）；
+* -T,设置远程主机命令执行超时时间（秒）；
+* -w,当命令执行失败，发出告警，而非默认终止任务。
+
+有时候我们可已不需要写一行python代码也可以完成远程操作，直接使用命令的形式，例如
+
+```
+fab -p 123456(密码) -H 192.168.1.21,192.168.1.22 -- 'uname -s'
+```
+
+## fabric的环境变量
+
+fabric的环境变量有很多，存放在一个字典中， fabric.state.env，而它包含在fabric.api中。 为了方便，我们一般使用env来指代环境变量。 env环境变量可以控制很多fabric的行为，一般通过env.xxx可以进行设置。
+
+fabric默认使用本地用户通过ssh进行连接远程机器，不过你可以通过env.user变量进行覆盖。 当你进行ssh连接时，fabric会让你交互的让你输入远程机器密码，如果你设置了env.password变量，则就不需要交互的输入密码。 下面介绍一些常用的环境变量：
+
+* abort_on_prompts 设置是否运行在交互模式下，例如会提示输入密码之类，默认是false
+* connection_attempts fabric尝试连接到新服务器的次数，默认1次
+* cwd 目前的工作目录，一般用来确定cd命令的上下文环境
+* disable_known_hosts 默认是false，如果是true，则会跳过用户知道的hosts文件
+* exclude_hosts 指定一个主机列表，在fab执行时，忽略列表中的机器
+* fabfile 默认值是fabfile.py在fab命令执行时，会自动搜索这个文件执行。
+* host_string 当fabric连接远程机器执行run、put时，设置的user/host/port等
+* hosts 一个全局的host列表
+* keepalive 默认0 设置ssh的keepalive
+* loacl_user 一个只读的变量，包含了本地的系统用户，同user变量一样，但是user可以修改
+* parallel 默认false，如果是true则会并行的执行所有的task
+* pool_size 默认0 在使用parallel执行任务时设置的进程数
+* password ssh远程连接时使用的密码，也可以是在使用sudo时使用的密码
+* passwords 一个字典，可以为每一台机器设置一个密码，key是ip，value是密码
+* path 在使用run/sudo/local执行命令时设置的$PATH环境变量
+* port 设置主机的端口
+* roledefs 一个字典，设置主机名到规则组的映射
+* roles 一个全局的role列表
+* shell 默认是/bin/bash -1 -c 在执行run命令时，默认的shell环境
+* skip_bad_hosts 默认false，为ture时，会导致fab跳过无法连接的主机
+* sudo_prefix 默认值"sudo -S -p '%(sudo_prompt)s' " % env 执行sudo命令时调用的sudo环境
+* sudo_prompt 默认值"sudo password:"
+* timeout 默认10 网络连接的超时时间
+* user ssh使用哪个用户登录远程主机
+* local 执行本地命令，如： local('uname -s')
+* lcd 切换本地目录，如： lcd('/home')
+* cd 切换远程目录，如： cd('/data/logs')
+* run 执行远程命令 如： run('free -m')
+* sudo sudo方式执行命令，如sudo('/etc/init.d/httpd start')
+* put 上传本地文件到远程主机，如put('/home/user.info',/data/user.info'')
+* get 从远程主机下载文件到本地，如get('/home/user.info',/data/user.info'')
+* prompt 获得用户输入信息，如： prompt('please input user:')
+* confirm 获得提示信息确认， 如： confirm('Tests failed. Continue[Y/N]?')
+* reboot 重启远程主机，如： reboot();
+* @task 函数修饰符，标识的函数为fab可调用的，非标记对fab不可见，纯业务逻辑。
+* @runs_once, 函数修饰符，标识的函数只会执行一次，不会受多台主机的影响。
 
