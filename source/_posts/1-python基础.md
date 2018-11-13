@@ -57,7 +57,7 @@ python本身支持整数以及浮点数。你可以对这些数字进行下表�
 | * | 乘法 | 2 * 2 | 4 |
 | / | 浮点数除法 | 7 / 2 | 3.5 |
 | // | 整数除法 | 7 // 2 | 3 |
-| / | 摸（求余） | 7 % 3 | 1 |
+| / | 模（求余） | 7 % 3 | 1 |
 | ** | 幂 | 2 ** 2 | 4  |
 
 
@@ -599,12 +599,12 @@ set([1, 2, 3, 4])
 ```
 >>> num = [1, 2, 3]
 >>> name = ["l1", "l2", "l3", "l4", "l5"]
->>> englist = ["one", "two", "three"]
+>>> english = ["one", "two", "three"]
 ```
 可以把上面每一个列表当做一个元素，并建立一个元组：
 
 ```
->>> tol = num, name, englist
+>>> tol = num, name, english
 >>> tol
 ([1, 2, 3], ['l1', 'l2', 'l3', 'l4', 'l5'], ['one', 'two', 'three'])
 >>>
@@ -612,16 +612,16 @@ set([1, 2, 3, 4])
 同样，可以创建一个包含上面三个列表的列表：
 
 ```
->>> lol = [num, name, englist]
+>>> lol = [num, name, english]
 >>> lol
 [[1, 2, 3], ['l1', 'l2', 'l3', 'l4', 'l5'], ['one', 'two', 'three']]
 ```
 还可以创建以这三个列表为值的字典：
 
 ```
->>> dol = {'num': num, 'name':name, 'englist':englist}
+>>> dol = {'num': num, 'name':name, 'english':english}
 >>> dol
-{'englist': ['one', 'two', 'three'], 'name': ['l1', 'l2', 'l3', 'l4', 'l5'], 'num': [1, 2, 3]}
+{'english': ['one', 'two', 'three'], 'name': ['l1', 'l2', 'l3', 'l4', 'l5'], 'num': [1, 2, 3]}
 >>>
 ```
 在创建自定义数据结构的过程中，唯一的限制来自于这些内置数据本身。比如字典的键必须为不可变对象，因此列表、字典和集合都不能作为字典的键，但元组可以作为字典的键。举个例子，我们可以通过 GPS 坐标（纬度，经度，海拔）定位感兴趣的位置：
@@ -1504,6 +1504,13 @@ Python 的一个显著特点是具有庞大的模块标准库，这些模块可�
 
 ## 使用 pprint() 友好输出
 
+## argparse 命令行解析
+
+python中的命令行解析最简单最原始的方法是使用sys.argv来实现，更高级的可以使用argparse这个模块。argparse从python 2.7开始被加入到标准库中，所以如果你的python版本还在2.7以下，那么需要先手动安装。
+
+
+
+
 # 基础课实战
 
 密码管理器
@@ -1522,7 +1529,7 @@ Python 的一个显著特点是具有庞大的模块标准库，这些模块可�
 * 密码文件的云备份   
 
 
-# 第三方库
+# 9.第三方库
 
 ## 运维常用的第三方库
 
@@ -1930,7 +1937,7 @@ sftp.get('/root/testfile','/tmp/361way')
 sftp.put('/root/crash-6.1.6.tar.gz','/tmp/crash-6.1.6.tar.gz')
 scp.close()
 ```
-一个目录下多个文件上传下载的示例：
+一个目录下多个文件上传下载的示例：bx
 
 ```
 #!/usr/bin/env python
@@ -2078,4 +2085,9 @@ fabric默认使用本地用户通过ssh进行连接远程机器，不过你可�
 * reboot 重启远程主机，如： reboot();
 * @task 函数修饰符，标识的函数为fab可调用的，非标记对fab不可见，纯业务逻辑。
 * @runs_once, 函数修饰符，标识的函数只会执行一次，不会受多台主机的影响。
+
+
+# 学习资源：
+http://www.pythondoc.com/pythontutorial3/index.html
+http://python3-cookbook.readthedocs.io/zh_CN/latest/index.html
 
